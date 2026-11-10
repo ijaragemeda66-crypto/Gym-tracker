@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#111827">
+<title>My Gym Tracker</title>
+<style>
+:root{--bg:#0b1020;--panel:#151d31;--card:#1b2740;--text:#f4f7fb;--muted:#a7b3c8;--line:#2b3955;--accent:#8be0b0;--accent2:#183d32}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(160deg,#101a2d,#090e19 65%);color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh}
+main{max-width:780px;margin:auto;padding:28px 18px 50px}.top{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}.eyebrow{font-size:12px;letter-spacing:.14em;color:var(--accent);font-weight:700}.title{font-size:clamp(27px,6vw,38px);font-weight:800;letter-spacing:-.04em;margin:3px 0}.sub{color:var(--muted);margin:0}.badge{border:1px solid var(--line);border-radius:999px;padding:8px 12px;color:var(--muted);font-size:13px}
+.progress-card,.workout,.notes{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px;margin-top:20px}.progress-head{display:flex;justify-content:space-between;gap:12px;font-size:14px;color:var(--muted)}.bar{height:10px;background:#29354d;border-radius:99px;overflow:hidden;margin-top:11px}.bar>div{height:100%;width:0;background:var(--accent);border-radius:99px;transition:width .2s}
+.days{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:20px}.day{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:12px;padding:12px 6px;font-weight:700;cursor:pointer;min-height:48px}.day[aria-pressed=true]{background:var(--accent2);border-color:var(--accent);color:var(--accent)}
+.workout-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.workout h2{font-size:21px;margin:0}.muted{color:var(--muted);font-size:14px}.count{white-space:nowrap;color:var(--accent);font-weight:700;font-size:14px}
+.exercise{padding:14px 3px;border-bottom:1px solid var(--line)}.exercise:last-child{border-bottom:0}.exercise-main{display:flex;align-items:center;gap:13px}.exercise input{width:22px;height:22px;accent-color:var(--accent);flex-shrink:0;cursor:pointer}.exercise label{flex:1;cursor:pointer}.exercise strong{display:block;font-weight:650}.exercise small{color:var(--muted)}.exercise.done strong{text-decoration:line-through;color:#91a09d}.exercise.done small{opacity:.65}
+.guide-btn{background:#263650;color:#dce8f8;border:1px solid #3b506f;border-radius:9px;padding:8px 11px;font-size:13px;cursor:pointer;min-height:38px}.guide{display:none;margin:12px 0 2px 35px;padding:13px;border:1px solid var(--line);background:#101a2c;border-radius:13px}.guide.open{display:block}.guide-layout{display:grid;grid-template-columns:minmax(125px,180px) 1fr;gap:13px;align-items:center}.guide svg{width:100%;height:auto;display:block;background:#17243a;border-radius:10px}.guide h4{margin:0 0 5px;font-size:15px}.guide p{margin:4px 0;color:var(--muted);font-size:13px}.guide .cues{color:#d7e2f1}
+.actions{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:16px}.status{font-size:14px;color:var(--muted)}button.secondary{background:transparent;border:1px solid var(--line);color:var(--muted);padding:9px 13px;border-radius:10px;cursor:pointer}.notes h3{margin:0 0 8px}.notes p{margin:6px 0;color:var(--muted);font-size:14px}.footer{text-align:center;color:#74829a;font-size:12px;margin-top:22px}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+@media(max-width:480px){main{padding:20px 13px 36px}.progress-card,.workout,.notes{padding:15px}.days{gap:6px}.day{font-size:14px}.guide{margin-left:0}.guide-layout{grid-template-columns:1fr}.guide svg{max-width:220px;margin:auto}}
+</style>
+</head>
+<body>
+<main>
+<header class="top"><div><div class="eyebrow">YOUR TRAINING SPACE</div><h1 class="title">My Gym Tracker</h1><p class="sub">Build strength. Track consistency. Get stronger.</p></div><div class="badge">4-day training plan</div></header>
+<section class="progress-card" aria-label="Weekly progress"><div class="progress-head"><span>Weekly progress</span><strong id="total">0 completed</strong></div><div class="bar"><div id="bar"></div></div></section>
+<nav class="days" aria-label="Workout days"><button class="day" data-day="mon" aria-pressed="true">MON</button><button class="day" data-day="tue" aria-pressed="false">TUE</button><button class="day" data-day="thu" aria-pressed="false">THU</button><button class="day" data-day="fri" aria-pressed="false">FRI</button></nav>
+<section class="workout"><div class="workout-head"><div><h2 id="dayTitle">Monday — Upper Body A</h2><div class="muted" id="dayDesc">Chest, back, shoulders and arms</div></div><div class="count" id="dayCount">0 / 7</div></div><div id="exerciseList"></div><div class="actions"><span class="status" id="status" aria-live="polite">Let's get started.</span><button class="secondary" id="resetDay">Reset this day</button></div></section>
+<section class="notes"><h3>Training reminders</h3><p>• Warm up for 5–10 minutes before lifting.</p><p>• Rest 2–3 minutes after heavy lifts and 60–90 seconds after isolation exercises.</p><p>• Use controlled form. Increase weight gradually when all reps feel comfortable.</p><p>• Wednesday and Sunday: rest. Saturday: optional walk or light cardio.</p><p>• Aim for 7–9 hours of sleep and around 110–140 g of protein daily.</p><p>• The drawings are simplified movement guides. Start light and ask a gym trainer to check your form if unsure.</p></section>
+<div class="footer">Checkmarks are saved automatically in this browser on this device.</div>
+</main>
+<script>
+const plans={
+ mon:{title:"Monday — Upper Body A",desc:"Chest, back, shoulders and arms",items:[["Bench press","3 × 10","bench"],["Lat pulldown","3 × 10","pulldown"],["Dumbbell shoulder press","3 × 10","shoulder"],["One-arm dumbbell row","3 × 10 each side","row"],["Pec Deck / Chest Fly","2 × 12","pecdeck"],["Bicep curls","3 × 10","curl"],["Dumbbell overhead triceps extension","3 × 10","tricepsOverhead"]]},
+ tue:{title:"Tuesday — Lower Body A",desc:"Legs, glutes and core",items:[["Leg press","4 × 10","legpress"],["Leg extension","3 × 12","legextension"],["Dumbbell Romanian deadlift","3 × 10","rdl"],["Standing calf raises","3 × 15","calf"],["Plank","3 × 30–45 sec","plank"]]},
+ thu:{title:"Thursday — Upper Body B",desc:"Upper chest, back, shoulders and arms",items:[["Incline dumbbell bench press","3 × 10","incline"],["Lat pulldown","3 × 10","pulldown"],["Dumbbell lateral raises","3 × 12","lateral"],["One-arm dumbbell row","3 × 10 each side","row"],["Hammer curls","3 × 10","hammer"],["Knee push-ups","3 × maximum good reps","pushup"],["Dumbbell triceps kickback","2 × 12","tricepsKickback"]]},
+ fri:{title:"Friday — Lower Body B",desc:"Legs, glutes and core",items:[["Goblet squats","3 × 10","goblet"],["Leg press","3 × 10","legpress"],["Dumbbell lunges","2 × 10 each leg","lunge"],["Dumbbell Romanian deadlift","3 × 10","rdl"],["Standing calf raises","3 × 15","calf"],["Plank","3 × 30–45 sec","plank"]]}
+};
+const guides={
+ bench:["Bench press","Lie with eyes under the bar. Grip slightly wider than shoulder width. Lower the bar to mid-chest, then press up.","Keep feet planted, shoulder blades gently pulled back, wrists stacked over elbows. Do not bounce the bar."],
+ pulldown:["Lat pulldown","Sit tall, secure thighs under pads. Pull the bar toward upper chest, then return slowly until arms are straight.","Lean back only slightly. Pull elbows down; don't swing or pull the bar behind your neck."],
+ shoulder:["Dumbbell shoulder press","Start with dumbbells beside shoulders. Press overhead, then lower under control.","Keep ribs down and avoid arching your lower back. Use a weight you can control."],
+ row:["One-arm dumbbell row","Support one hand on a bench. Let the dumbbell hang, pull elbow toward hip, then lower slowly.","Keep back neutral and torso steady. Avoid twisting to lift the weight."],
+ pecdeck:["Pec Deck / Chest Fly","Sit with back supported and elbows/forearms on pads. Bring arms together in front, then open slowly.","Use a comfortable range; don't force a deep stretch or let the weights slam."],
+ curl:["Bicep curl","Stand tall with palms forward. Bend elbows to curl dumbbells toward shoulders, then lower slowly.","Keep elbows near your sides; avoid swinging your body."],
+ tricepsOverhead:["Dumbbell overhead triceps extension","Hold one dumbbell with both hands overhead. Bend elbows to lower it behind your head, then straighten arms.","Keep elbows pointing mostly forward and upper arms steady. Start with a light dumbbell."],
+ legpress:["Leg press","Place feet about shoulder-width on platform. Lower until knees are comfortably bent, then push platform away.","Keep hips and lower back against the pad. Don't lock knees or let them collapse inward."],
+ legextension:["Leg extension","Sit with knees aligned with machine pivot and pad above ankles. Straighten knees, pause, then lower slowly.","Use controlled motion and avoid kicking or snapping the knees straight."],
+ rdl:["Dumbbell Romanian deadlift","Stand holding dumbbells in front of thighs. Push hips back with a soft knee bend; lower weights along legs, then stand tall.","Keep spine neutral and weights close to legs. Stop when hamstrings stretch; don't round your back."],
+ calf:["Standing calf raise","Stand tall, rise onto the balls of your feet, pause, then lower heels slowly.","Use a stable support if needed. Move through a comfortable full range."],
+ plank:["Plank","Place forearms on floor, elbows under shoulders. Extend legs and hold a straight line from head to heels.","Brace your stomach and squeeze glutes. Don't let hips sag or rise too high."],
+ incline:["Incline dumbbell press","Set bench to a modest incline. Start dumbbells beside upper chest, press up, then lower slowly.","Keep shoulder blades supported and wrists straight. Avoid an excessively steep bench angle."],
+ lateral:["Dumbbell lateral raise","Hold light dumbbells at sides. Raise arms out to the sides to about shoulder height, then lower slowly.","Keep a slight elbow bend. Don't shrug or swing the weights."],
+ hammer:["Hammer curl","Hold dumbbells with palms facing each other. Curl toward shoulders and lower slowly.","Keep wrists neutral and elbows close to your sides."],
+ pushup:["Knee push-up","Start on hands and knees, hands just wider than shoulders. Keep a straight line from head to knees; lower chest, then push up.","Brace your core and keep elbows angled slightly back, not flared straight sideways."],
+ goblet:["Goblet squat","Hold one dumbbell close to chest. Sit hips down between knees, then push through feet to stand.","Keep heels down, chest lifted and knees tracking in line with toes."],
+ lunge:["Dumbbell lunge","Stand tall holding dumbbells. Step one foot forward, lower both knees, then push back to standing. Alternate legs.","Take a stable step; keep front knee tracking over foot and torso upright."],
+ tricepsKickback:["Dumbbell triceps kickback","Hinge forward with a flat back. Keep upper arm beside torso, straighten elbow to move dumbbell back, then bend slowly.","Move only the forearm; don't swing the shoulder. Use a light weight."]
+};
+function svgGuide(id){
+ const common=`<svg viewBox="0 0 220 140" role="img" aria-label="Simple exercise movement drawing"><defs><marker id="arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6" fill="#8be0b0"/></marker></defs><g fill="none" stroke="#d9e6f5" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">`;
+ const end=`</g><g fill="#8be0b0" font-size="10" font-family="system-ui"><text x="15" y="130">START</text><text x="164" y="130">MOVEMENT →</text></g></svg>`;
+ const person=(x,y,pose='stand')=>{
+  if(pose==='bench')return `<circle cx="${x}" cy="${y-28}" r="7" fill="#d9e6f5"/><path d="M${x+7} ${y-25} L${x+34} ${y-17} L${x+50} ${y-17} M${x+24} ${y-18} L${x+20} ${y+3} M${x+30} ${y-17} L${x+42} ${y+2}"/>`;
+  if(pose==='hinge')return `<circle cx="${x+8}" cy="${y-22}" r="7"/><path d="M${x+14} ${y-20} L${x+39} ${y-4} L${x+44} ${y+20} M${x+39} ${y-4} L${x+63} ${y+20} M${x+24} ${y-12} L${x+42} ${y+5}"/>`;
+  return `<circle cx="${x}" cy="${y-38}" r="7"/><path d="M${x} ${y-30} L${x} ${y+4} M${x} ${y-19} L${x-18} ${y-4} M${x} ${y-19} L${x+18} ${y-4} M${x} ${y+4} L${x-13} ${y+27} M${x} ${y+4} L${x+13} ${y+27}"/>`;
+ };
+ let shapes='';
+ const arrow='<path d="M95 34 Q112 15 129 34" stroke="#8be0b0" stroke-width="3" fill="none" marker-end="url(#arr)"/>';
+ switch(id){
+ case 'bench': shapes=`<path d="M18 93 H100 M34 93 V112 M87 93 V112 M112 22 V90 M105 22 H119 M108 18 H116 M108 90 H116" stroke="#8194b1"/>${person(48,80,'bench')}<path d="M42 42 H94 M42 36 V48 M94 36 V48" stroke="#8be0b0" stroke-width="4"/>${arrow}`;break;
+ case 'incline': shapes=`<path d="M20 95 L105 58 M25 95 V112 M102 58 V112 M112 20 V92" stroke="#8194b1"/>${person(48,72,'bench')}<path d="M54 27 L104 10 M54 21 V33 M104 4 V16" stroke="#8be0b0" stroke-width="4"/>${arrow}`;break;
+ case 'pulldown': shapes=`<path d="M40 15 V112 M40 15 H155 M155 15 V112 M75 15 V48 M65 48 H85 M65 48 L60 57 M85 48 L90 57 M70 15 V35 M60 35 H80" stroke="#8194b1"/>${person(108,95)}<path d="M89 44 V58 M127 44 V58 M89 44 H127" stroke="#8be0b0" stroke-width="4"/>${arrow}`;break;
+ case 'shoulder': shapes=`${person(85,88)}<path d="M67 47 L58 19 M103 47 L112 19 M53 15 H63 M107 15 H117" stroke="#8be0b0" stroke-width="4"/>${arrow}`;break;
+ case 'row': shapes=`<path d="M20 103 H110 M32 103 V116 M98 103 V116" stroke="#8194b1"/>${person(68,72,'hinge')}<path d="M108 78 L108 105 M102 78 H114" stroke="#8be0b0" stroke-width="4"/>${arrow}`;break;
+ case 'pecdeck': shapes=`<path d="M50 100 V70 H95 V100 M42 100 H103 M72 70 V112" stroke="#8194b1"/>${person(72,82)}<path d="M53 45 L34 62 M91 45 L110 62 M34 62 L43 70 M110 62 L101 70" stroke="#8be0b0" stroke-width="4"/>${arrow}`;break;
+ case 'curl': shapes=`${person(83,91)}<path d="M65 72 L58 48 M101 72 L108 48 M52 44 H64 M102 44 H114" stroke="#8be0b0" stroke-width="4"/>${arrow}`;break;
+ case 'tricepsOverhead': shapes=`${person(83,91)}<path d="M65 54 L70 17 L80 9 M101 54 L96 17 L86 9 M73 7 H93 M77 1 H89" stroke="#8be0b0" stroke-width="4"/>${arrow}`;break;
+ case 'tricepsKickback': shapes=`${person(80,78,'hinge')}<path d="M96 55 L127 39 L138 39 M127 39 L137 28" stroke="#8be0b0" stroke-width="4"/>${arrow}`;break;
+ case 'legpress': shapes=`<path d="M25 20 L110 20 L150 105 M25 20 L25 105 M25 105 H150 M42 75 L94 75 M42 75 L60 55" stroke="#8194b1"/>${person(75,83,'bench')}<path d="M113 40 L150 75 M142 67 L150 75 L139 77" stroke="#8be0b0" stroke-width="4"/>${arrow}`;break;
+ case 'legextension': shapes=`<path d="M40 90 H115 M50 90 V112 M105 90 V112 M55 62 H92 V90" stroke="#8194b1"/>${person(70,78,'bench')}<path d="M70 78 L112 83 M108 77 L118 83 L108 89" stroke="#8be0b0" stroke-width="4"/>${arrow}`;break;
+ case 'rdl': shapes=`${person(70,78,'hinge')}<path d="M105 70 V108 M99 70 H111" stroke="#8be0b0" stroke-width="4"/><path d="M25 110 H160" stroke="#8194b1"/>${arrow}`;break;
+ case 'calf': shapes=`${person(82,90)}<path d="M69 118 H95 M69 114 L74 118 M95 114 L90 118" stroke="#8194b1"/>${arrow}<path d="M130 95 V70 M124 77 L130 70 L136 77" stroke="#8be0b0" stroke-width="3"/>`;break;
+ case 'plank': shapes=`<path d="M25 95 H180 M38 95 V112 M166 95 V112" stroke="#8194b1"/> <circle cx="47" cy="60" r="7"/><path d="M54 64 L111 76 L158 89 M78 70 L67 94 M113 77 L126 94" />${arrow}`;break;
+ case 'lateral': shapes=`${person(83,91)}<path d="M65 55 L38 43 M101 55 L128 43 M32 39 L43 39 M123 39 L134 39" stroke="#8be0b0" stroke-width="4"/>${arrow}`;break;
+ case 'hammer': shapes=`${person(83,91)}<path d="M65 72 L58 48 M101 72 L108 48 M53 44 V54 M103 44 V54" stroke="#8be0b0" stroke-width="4"/>${arrow}`;break;
+ case 'pushup': shapes=`<path d="M25 100 H180" stroke="#8194b1"/><circle cx="45" cy="55" r="7"/><path d="M52 59 L105 70 L153 84 M76 65 L70 98 M111 72 L125 98"/>${arrow}`;break;
+ case 'goblet': shapes=`${person(83,91)}<rect x="73" y="37" width="20" height="18" rx="4" stroke="#8be0b0" stroke-width="3"/>${arrow}`;break;
+ case 'lunge': shapes=`<circle cx="82" cy="27" r="7"/><path d="M82 35 L82 70 L52 99 M82 70 L120 91 M82 48 L62 66 M82 48 L102 66" /><path d="M52 99 L30 99 M120 91 L150 105" stroke="#8be0b0" stroke-width="4"/>${arrow}`;break;
+ }
+ return common+shapes+end;
+}
+const STORAGE_KEY="my-gym-tracker-v2";let state={};try{state=JSON.parse(localStorage.getItem(STORAGE_KEY)||"{}")}catch(e){}for(const k of Object.keys(plans))if(!Array.isArray(state[k]))state[k]=[];
+let current="mon";const $=id=>document.getElementById(id);
+function save(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}catch(e){}}
+function update(){const total=Object.values(plans).reduce((n,p)=>n+p.items.length,0),done=Object.values(state).reduce((n,a)=>n+a.length,0);$("total").textContent=`${done} / ${total} completed`;$("bar").style.width=`${done/total*100}%`;$("dayCount").textContent=`${state[current].length} / ${plans[current].items.length}`;$("status").textContent=state[current].length===plans[current].items.length?"Workout complete — great work! 🎉":state[current].length?"Nice progress. Keep going!":"Let's get started."}
+function render(){const p=plans[current];$("dayTitle").textContent=p.title;$("dayDesc").textContent=p.desc;document.querySelectorAll(".day").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.day===current)));const list=$("exerciseList");list.replaceChildren();
+p.items.forEach(([name,reps,id],i)=>{const row=document.createElement("div");row.className="exercise"+(state[current].includes(i)?" done":"");const main=document.createElement("div");main.className="exercise-main";const check=document.createElement("input");check.type="checkbox";check.checked=state[current].includes(i);check.id=`${current}-${i}`;const label=document.createElement("label");label.htmlFor=check.id;const strong=document.createElement("strong");strong.textContent=name;const small=document.createElement("small");small.textContent=reps;label.append(strong,small);const guideBtn=document.createElement("button");guideBtn.type="button";guideBtn.className="guide-btn";guideBtn.textContent="How to";guideBtn.setAttribute("aria-expanded","false");main.append(check,label,guideBtn);
+const detail=document.createElement("div");detail.className="guide";const layout=document.createElement("div");layout.className="guide-layout";const pic=document.createElement("div");pic.innerHTML=svgGuide(id);const text=document.createElement("div");const h=document.createElement("h4");h.textContent=guides[id][0];const p1=document.createElement("p");p1.textContent=guides[id][1];const p2=document.createElement("p");p2.className="cues";p2.textContent="Form tips: "+guides[id][2];text.append(h,p1,p2);layout.append(pic,text);detail.append(layout);guideBtn.addEventListener("click",()=>{const open=detail.classList.toggle("open");guideBtn.setAttribute("aria-expanded",String(open));guideBtn.textContent=open?"Hide guide":"How to"});
+check.addEventListener("change",()=>{if(check.checked){if(!state[current].includes(i))state[current].push(i)}else state[current]=state[current].filter(x=>x!==i);save();render()});row.append(main,detail);list.append(row)});update()}
+document.querySelectorAll(".day").forEach(b=>b.addEventListener("click",()=>{current=b.dataset.day;render()}));$("resetDay").addEventListener("click",()=>{if(confirm("Clear the checkmarks for this workout day?")){state[current]=[];save();render()}});render();
+</script>
+</body>
+</html>
